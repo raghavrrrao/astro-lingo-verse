@@ -9,7 +9,158 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      achievements: {
+        Row: {
+          created_at: string
+          description: string
+          exercises_requirement: number | null
+          icon: string | null
+          id: string
+          name: string
+          streak_requirement: number | null
+          xp_requirement: number | null
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          exercises_requirement?: number | null
+          icon?: string | null
+          id?: string
+          name: string
+          streak_requirement?: number | null
+          xp_requirement?: number | null
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          exercises_requirement?: number | null
+          icon?: string | null
+          id?: string
+          name?: string
+          streak_requirement?: number | null
+          xp_requirement?: number | null
+        }
+        Relationships: []
+      }
+      exercises: {
+        Row: {
+          completed_at: string
+          exercise_type: string
+          id: string
+          is_correct: boolean
+          lesson_id: number
+          user_id: string
+          xp_gained: number
+        }
+        Insert: {
+          completed_at?: string
+          exercise_type: string
+          id?: string
+          is_correct: boolean
+          lesson_id: number
+          user_id: string
+          xp_gained?: number
+        }
+        Update: {
+          completed_at?: string
+          exercise_type?: string
+          id?: string
+          is_correct?: boolean
+          lesson_id?: number
+          user_id?: string
+          xp_gained?: number
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          id: string
+          updated_at: string
+          username: string | null
+        }
+        Insert: {
+          created_at?: string
+          id: string
+          updated_at?: string
+          username?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          updated_at?: string
+          username?: string | null
+        }
+        Relationships: []
+      }
+      user_achievements: {
+        Row: {
+          achievement_id: string
+          id: string
+          unlocked_at: string
+          user_id: string
+        }
+        Insert: {
+          achievement_id: string
+          id?: string
+          unlocked_at?: string
+          user_id: string
+        }
+        Update: {
+          achievement_id?: string
+          id?: string
+          unlocked_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_achievements_achievement_id_fkey"
+            columns: ["achievement_id"]
+            isOneToOne: false
+            referencedRelation: "achievements"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_progress: {
+        Row: {
+          created_at: string
+          id: string
+          last_activity_date: string | null
+          level: number
+          streak: number
+          total_correct_answers: number
+          total_exercises_completed: number
+          updated_at: string
+          user_id: string
+          xp: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          last_activity_date?: string | null
+          level?: number
+          streak?: number
+          total_correct_answers?: number
+          total_exercises_completed?: number
+          updated_at?: string
+          user_id: string
+          xp?: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          last_activity_date?: string | null
+          level?: number
+          streak?: number
+          total_correct_answers?: number
+          total_exercises_completed?: number
+          updated_at?: string
+          user_id?: string
+          xp?: number
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

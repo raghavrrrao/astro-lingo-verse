@@ -4,9 +4,13 @@ import { ArrowLeft, CheckCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Exercise from '@/components/Exercise';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
+import { useUserProgress } from '@/hooks/useUserProgress';
 
 const LessonPage = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const { updateProgress } = useUserProgress();
   const [currentExercise, setCurrentExercise] = useState(0);
   const [completedExercises, setCompletedExercises] = useState<boolean[]>([]);
   const [xpGained, setXpGained] = useState(0);
@@ -37,13 +41,17 @@ const LessonPage = () => {
     }
   ];
 
-  const handleExerciseComplete = (isCorrect: boolean) => {
+  const handleExerciseComplete = async (isCorrect: boolean) => {
     const newCompleted = [...completedExercises];
     newCompleted[currentExercise] = isCorrect;
     setCompletedExercises(newCompleted);
 
-    if (isCorrect) {
-      setXpGained(prev => prev + 10);
+    const earnedXp = isCorrect ? 10 : 0;
+    setXpGained(prev => prev + earnedXp);
+
+    // Update progress in database if user is logged in
+    if (user) {
+      await updateProgress(earnedXp, isCorrect);
     }
 
     if (currentExercise < exercises.length - 1) {

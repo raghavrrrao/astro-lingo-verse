@@ -1,28 +1,25 @@
 
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
+import { useUserProgress } from '@/hooks/useUserProgress';
 import Logo from '@/components/Logo';
 import LevelCard from '@/components/LevelCard';
 import ProgressStats from '@/components/ProgressStats';
 import LanguageSelector from '@/components/LanguageSelector';
 import { Button } from '@/components/ui/button';
-import { BookOpen, Users, Zap } from 'lucide-react';
+import { BookOpen, Users, Zap, LogOut } from 'lucide-react';
 
 const Index = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const { user, loading: authLoading, signOut } = useAuth();
+  const { progress, loading: progressLoading, updateProgress } = useUserProgress();
   
   const [selectedLanguage, setSelectedLanguage] = useState({
     code: 'es',
     name: 'Spanish',
     flag: '🇪🇸'
-  });
-  
-  const [userStats, setUserStats] = useState({
-    xp: 450,
-    streak: 7,
-    level: 3,
-    accuracy: 87
   });
 
   const [unlockedLevels, setUnlockedLevels] = useState([1, 2, 3]);
@@ -30,19 +27,35 @@ const Index = () => {
 
   // Handle lesson completion from navigation state
   useEffect(() => {
-    if (location.state?.lessonCompleted) {
+    if (location.state?.lessonCompleted && user) {
       const xpGained = location.state.xpGained || 0;
-      setUserStats(prev => ({
-        ...prev,
-        xp: prev.xp + xpGained
-      }));
+      updateProgress(xpGained, true);
       
       // Unlock next level if current level was completed
       if (!unlockedLevels.includes(4)) {
         setUnlockedLevels(prev => [...prev, 4]);
       }
     }
-  }, [location.state]);
+  }, [location.state, user, updateProgress, unlockedLevels]);
+
+  // Redirect to auth if not logged in
+  useEffect(() => {
+    if (!authLoading && !user) {
+      navigate('/auth');
+    }
+  }, [user, authLoading, navigate]);
+
+  if (authLoading || progressLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-2xl neon-text">Loading...</div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return null; // Will redirect to auth
+  }
 
   const levels = [
     {
@@ -89,6 +102,11 @@ const Index = () => {
     }
   };
 
+  const handleSignOut = async () => {
+    await signOut();
+    navigate('/auth');
+  };
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -102,8 +120,13 @@ const Index = () => {
                 selectedLanguage={selectedLanguage}
                 onLanguageChange={setSelectedLanguage}
               />
-              <Button className="glass-morphism cyber-border rounded-xl">
-                Profile
+              <Button 
+                onClick={handleSignOut}
+                variant="ghost"
+                className="glass-morphism cyber-border rounded-xl flex items-center space-x-2"
+              >
+                <LogOut className="w-4 h-4" />
+                <span>Sign Out</span>
               </Button>
             </div>
           </div>
@@ -142,7 +165,7 @@ const Index = () => {
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 pb-16">
         {/* Progress Stats */}
-        <ProgressStats {...userStats} />
+        <ProgressStats {...progress} />
 
         {/* Learning Path */}
         <section>
